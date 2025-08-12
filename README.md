@@ -53,7 +53,7 @@ npm install
 
 ### 3. 환경 변수 설정
 ```bash
-cp .env.example .env
+
 ```
 `.env` 파일을 열어 개인키를 입력하세요:
 ```
