@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Somnia Minesweeper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .wallet-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .game-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 120px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 2px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .tile {
+            width: 50px;
+            height: 50px;
+            background: #c0c0c0;
+            border: 2px solid #808080;
+            border-top-color: white;
+            border-left-color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            user-select: none;
+        }
+        
+        .tile:hover {
+            background: #d0d0d0;
+        }
+        
+        .tile.revealed {
+            background: #e0e0e0;
+            border: 1px solid #808080;
+        }
+        
+        .tile.flagged {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .tile.mine {
+            background: #ff4757;
+            color: white;
+        }
+        
+        .tile.number-1 { color: #0074cc; }
+        .tile.number-2 { color: #228b22; }
+        .tile.number-3 { color: #ff6347; }
+        .tile.number-4 { color: #800080; }
+        .tile.number-5 { color: #8b0000; }
+        .tile.number-6 { color: #2e8b57; }
+        .tile.number-7 { color: #000; }
+        .tile.number-8 { color: #808080; }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.2);
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(31, 38, 135, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status-message {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            .game-board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+            }
+            
+            .tile {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⛏️ Somnia Minesweeper</h1>
+        <p>Blockchain-powered Minesweeper on Somnia Testnet</p>
+    </div>
+    
+    <div class="wallet-info">
+        <div id="walletStatus">
+            <button class="btn" onclick="connectWallet()">Connect Wallet</button>
+        </div>
+    </div>
+    
+    <div class="game-info">
+        <div class="info-card">
+            <div>Score</div>
+            <div id="playerScore">0</div>
+        </div>
+        <div class="info-card">
+            <div>Wins</div>
+            <div id="playerWins">0</div>
+        </div>
+        <div class="info-card">
+            <div>Mines Left</div>
+            <div id="minesLeft">10</div>
+        </div>
+        <div class="info-card">
+            <div>Time</div>
+            <div id="gameTime">0s</div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="btn" id="startGameBtn" onclick="startNewGame()" disabled>
+            Start New Game (0.001 ETH)
+        </button>
+        <button class="btn" id="refreshBtn" onclick="refreshGameState()">
+            Refresh Game
+        </button>
+    </div>
+    
+    <div id="statusMessage" class="status-message hidden"></div>
+    
+    <div class="game-board" id="gameBoard">
+        <!-- Game board will be generated here -->
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        // Somnia Testnet configuration
+        const SOMNIA_NETWORK = {
+            chainId: '0xC488', // 50312 in hex
+            chainName: 'Somnia Testnet',
+            nativeCurrency: {
+                name: 'SLL',
+                symbol: 'SLL',
+                decimals: 18,
+            },
+            rpcUrls: ['https://dream-rpc.somnia.network/'],
+            blockExplorerUrls: ['https://shannon-explorer.somnia.network/'],
+        };
+        
+        // Contract configuration (update with deployed contract address)
+        const CONTRACT_ADDRESS = '0x448708eBced0886CD6dA771BA45A35265ce6cF05';
+        const CONTRACT_ABI = [
+            "function startGame() external payable",
+            "function revealTile(uint8 position) external",
+            "function flagTile(uint8 position) external",
+            "function getGameState() external view returns (uint256[64] memory board, bool[64] memory revealed, bool[64] memory flagged, bool gameOver, bool won)",
+            "function playerScores(address) external view returns (uint256)",
+            "function playerWins(address) external view returns (uint256)",
+            "event GameStarted(address indexed player)",
+            "event TileRevealed(address indexed player, uint8 position)",
+            "event TileFlagged(address indexed player, uint8 position, bool flagged)",
+            "event GameOver(address indexed player, bool won, uint256 score)"
+        ];
+        
+        let provider;
+        let signer;
+        let contract;
+        let gameState = {
+            board: new Array(64).fill(10),
+            revealed: new Array(64).fill(false),
+            flagged: new Array(64).fill(false),
+            gameOver: false,
+            won: false
+        };
+        let gameStartTime = 0;
+        let gameTimer;
+        let isRightClick = false;
+        
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum !== 'undefined') {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [SOMNIA_NETWORK],
+                    });
+                    
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send('eth_requestAccounts', []);
+                    signer = provider.getSigner();
+                    
+                    const address = await signer.getAddress();
+                    document.getElementById('walletStatus').innerHTML = `
+                        <div>Connected: ${address.slice(0, 6)}...${address.slice(-4)}</div>
+                    `;
+                    
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    
+                    document.getElementById('startGameBtn').disabled = false;
+                    
+                    await updatePlayerStats();
+                    showMessage('Wallet connected successfully!', 'success');
+                } else {
+                    showMessage('Please install MetaMask to play!', 'error');
+                }
+            } catch (error) {
+                console.error('Connection error:', error);
+                showMessage('Failed to connect wallet: ' + error.message, 'error');
+            }
+        }
+        
+        async function startNewGame() {
+            try {
+                showMessage('Starting new game...', 'loading');
+                
+                // First refresh game state to check current status
+                await refreshGameState();
+                
+                // If there's an ongoing game that hasn't been marked as over, wait a bit
+                if (!gameState.gameOver && gameState.board.some(v => v !== 10)) {
+                    showMessage('Please finish the current game first', 'error');
+                    return;
+                }
+                
+                // Disable button during transaction
+                document.getElementById('startGameBtn').disabled = true;
+                
+                const tx = await contract.startGame({
+                    value: ethers.utils.parseEther('0.001')
+                });
+                
+                await tx.wait();
+                
+                gameStartTime = Date.now();
+                startGameTimer();
+                
+                await refreshGameState();
+                showMessage('New game started! Click tiles to reveal them.', 'success');
+            } catch (error) {
+                console.error('Start game error:', error);
+                
+                // Re-enable button on error
+                document.getElementById('startGameBtn').disabled = false;
+                
+                // If the error is about game in progress, force refresh the state
+                if (error.message && error.message.includes('Game already in progress')) {
+                    showMessage('Refreshing game state...', 'loading');
+                    await refreshGameState();
+                    if (gameState.gameOver) {
+                        showMessage('Previous game ended. Please try starting a new game again.', 'info');
+                    } else {
+                        showMessage('You have an ongoing game. Please finish it first.', 'error');
+                    }
+                } else {
+                    showMessage('Failed to start game: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        async function refreshGameState() {
+            try {
+                if (!contract) return;
+                
+                const state = await contract.getGameState();
+                gameState.board = state[0].map(n => n.toNumber());
+                gameState.revealed = state[1];
+                gameState.flagged = state[2];
+                gameState.gameOver = state[3];
+                gameState.won = state[4];
+                
+                updateGameBoard();
+                updateMinesLeft();
+                
+                if (gameState.gameOver) {
+                    stopGameTimer();
+                    if (gameState.won) {
+                        showMessage('🎉 Congratulations! You won!', 'success');
+                    } else {
+                        showMessage('💥 Game Over! You hit a mine.', 'error');
+                    }
+                    await updatePlayerStats();
+                    
+                    // Re-enable the start button after game ends
+                    document.getElementById('startGameBtn').disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Refresh error:', error);
+                showMessage('Failed to refresh game state', 'error');
+            }
+        }
+        
+        async function revealTile(position) {
+            try {
+                if (gameState.gameOver || gameState.revealed[position] || gameState.flagged[position]) {
+                    return;
+                }
+                
+                showMessage('Revealing tile...', 'loading');
+                
+                const tx = await contract.revealTile(position);
+                await tx.wait();
+                
+                await refreshGameState();
+            } catch (error) {
+                console.error('Reveal tile error:', error);
+                showMessage('Failed to reveal tile: ' + error.message, 'error');
+            }
+        }
+        
+        async function flagTile(position) {
+            try {
+                if (gameState.gameOver || gameState.revealed[position]) {
+                    return;
+                }
+                
+                const tx = await contract.flagTile(position);
+                await tx.wait();
+                
+                await refreshGameState();
+            } catch (error) {
+                console.error('Flag tile error:', error);
+                showMessage('Failed to flag tile: ' + error.message, 'error');
+            }
+        }
+        
+        async function updatePlayerStats() {
+            try {
+                if (!contract || !signer) return;
+                
+                const address = await signer.getAddress();
+                const score = await contract.playerScores(address);
+                const wins = await contract.playerWins(address);
+                
+                document.getElementById('playerScore').textContent = score.toString();
+                document.getElementById('playerWins').textContent = wins.toString();
+            } catch (error) {
+                console.error('Stats update error:', error);
+            }
+        }
+        
+        function updateGameBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            
+            for (let i = 0; i < 64; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.position = i;
+                
+                if (gameState.flagged[i]) {
+                    tile.className += ' flagged';
+                    tile.textContent = '🚩';
+                } else if (gameState.revealed[i]) {
+                    tile.className += ' revealed';
+                    const value = gameState.board[i];
+                    
+                    if (value === 9) {
+                        tile.className += ' mine';
+                        tile.textContent = '💣';
+                    } else if (value > 0) {
+                        tile.className += ` number-${value}`;
+                        tile.textContent = value.toString();
+                    }
+                }
+                
+                tile.addEventListener('click', () => {
+                    if (!isRightClick) {
+                        revealTile(i);
+                    }
+                });
+                
+                tile.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    flagTile(i);
+                });
+                
+                tile.addEventListener('mousedown', (e) => {
+                    isRightClick = e.button === 2;
+                });
+                
+                board.appendChild(tile);
+            }
+        }
+        
+        function updateMinesLeft() {
+            const flaggedCount = gameState.flagged.filter(f => f).length;
+            document.getElementById('minesLeft').textContent = Math.max(0, 10 - flaggedCount);
+        }
+        
+        function startGameTimer() {
+            gameTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+                document.getElementById('gameTime').textContent = `${elapsed}s`;
+            }, 1000);
+        }
+        
+        function stopGameTimer() {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+        }
+        
+        function showMessage(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.classList.remove('hidden');
+            
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusDiv.classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // Initialize game board on page load
+        updateGameBoard();
+        
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    document.getElementById('walletStatus').innerHTML = '<button class="btn" onclick="connectWallet()">Connect Wallet</button>';
+                    document.getElementById('startGameBtn').disabled = true;
+                } else {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

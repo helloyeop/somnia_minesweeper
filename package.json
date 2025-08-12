@@ -1,0 +1,30 @@
+{
+  "name": "somnia-minesweeper",
+  "version": "1.0.0",
+  "description": "Blockchain Minesweeper game on Somnia Testnet",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network somnia",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "verify": "hardhat verify --network somnia"
+  },
+  "keywords": [
+    "blockchain",
+    "minesweeper",
+    "somnia",
+    "web3",
+    "game"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^17.2.1"
+  }
+}

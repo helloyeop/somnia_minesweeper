@@ -1,0 +1,50 @@
+# 의존성
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 환경 변수
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Hardhat
+cache/
+artifacts/
+typechain/
+typechain-types/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로그
+logs/
+*.log
+
+# 테스트 커버리지
+coverage/
+coverage.json
+
+# 빌드 결과물
+dist/
+build/
+
+# 임시 파일
+*.tmp
+*.temp
+.cache/
+
+# 배포 관련
+deployments/
+!deployments/.gitkeep
