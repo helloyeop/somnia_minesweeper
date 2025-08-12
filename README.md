@@ -9,9 +9,7 @@ Somnia 테스트넷에서 작동하는 블록체인 기반 지뢰찾기 게임�
 - [설치 방법](#설치-방법)
 - [게임 방법](#게임-방법)
 - [스마트 컨트랙트](#스마트-컨트랙트)
-- [프로젝트 구조](#프로젝트-구조)
-- [기여하기](#기여하기)
-- [라이선스](#라이선스)
+
 
 ## 🎯 소개
 
@@ -81,7 +79,6 @@ npm run deploy
    - 좌클릭: 타일 공개
    - 우클릭: 깃발 표시/해제
 4. **승리 조건**: 지뢰가 없는 모든 타일을 공개
-5. **보상**: 승리 시 0.002 ETH 획득
 
 ### 게임 규칙
 - 보드 크기: 8×8 (64 타일)
@@ -123,31 +120,3 @@ somnia_testnet/
 - **체인 ID**: 50312 (0xC488)
 - **통화**: SLL
 - **블록 익스플로러**: https://shannon-explorer.somnia.network/
-
-## 🤝 기여하기
-
-프로젝트에 기여하고 싶으시다면:
-
-1. 이 저장소를 포크하세요
-2. 새로운 기능 브랜치를 만드세요 (`git checkout -b feature/AmazingFeature`)
-3. 변경사항을 커밋하세요 (`git commit -m 'Add some AmazingFeature'`)
-4. 브랜치에 푸시하세요 (`git push origin feature/AmazingFeature`)
-5. Pull Request를 열어주세요
-
-## 📝 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
-
-## 🙏 감사의 글
-
-- [Somnia Network](https://somnia.network/) - 블록체인 인프라 제공
-- [OpenZeppelin](https://openzeppelin.com/) - 스마트 컨트랙트 보안 패턴
-- [Hardhat](https://hardhat.org/) - 개발 환경
-
-## 📞 연락처
-
-프로젝트에 대한 문의사항이 있으시면 이슈를 생성하거나 PR을 보내주세요.
-
----
-
-**⚠️ 주의**: 이것은 테스트넷 프로젝트입니다. 실제 자산을 사용하지 마세요.
