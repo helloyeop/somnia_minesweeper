@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Somnia Minesweeper V2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .wallet-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .difficulty-selection {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            min-width: 400px;
+        }
+        
+        .difficulty-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .difficulty-card {
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            border: 2px solid transparent;
+        }
+        
+        .difficulty-card:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+        
+        .difficulty-card.selected {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.3);
+        }
+        
+        .difficulty-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+        
+        .difficulty-info {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .game-info {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 80px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            flex: 1;
+        }
+        
+        .info-card div:first-child {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .info-card div:last-child {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .stats-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            max-width: 800px;
+        }
+        
+        .stats-grid {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .game-board {
+            display: grid;
+            gap: 2px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 20px 0;
+            max-width: 90vw;
+            overflow: auto;
+        }
+        
+        .tile {
+            background: #c0c0c0;
+            border: 2px solid #808080;
+            border-top-color: white;
+            border-left-color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            user-select: none;
+            min-width: 25px;
+            min-height: 25px;
+            font-size: 12px;
+        }
+        
+        .tile:hover {
+            background: #d0d0d0;
+        }
+        
+        .tile.revealed {
+            background: #e0e0e0;
+            border: 1px solid #808080;
+        }
+        
+        .tile.flagged {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .tile.mine {
+            background: #ff4757;
+            color: white;
+        }
+        
+        .tile.number-1 { color: #0074cc; }
+        .tile.number-2 { color: #228b22; }
+        .tile.number-3 { color: #ff6347; }
+        .tile.number-4 { color: #800080; }
+        .tile.number-5 { color: #8b0000; }
+        .tile.number-6 { color: #2e8b57; }
+        .tile.number-7 { color: #000; }
+        .tile.number-8 { color: #808080; }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.2);
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(31, 38, 135, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status-message {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* 반응형 타일 크기 */
+        .board-easy { 
+            grid-template-columns: repeat(9, 35px);
+            grid-template-rows: repeat(9, 35px);
+        }
+        .board-easy .tile { width: 35px; height: 35px; font-size: 14px; }
+        
+        .board-medium { 
+            grid-template-columns: repeat(16, 25px);
+            grid-template-rows: repeat(16, 25px);
+        }
+        .board-medium .tile { width: 25px; height: 25px; font-size: 12px; }
+        
+        .board-hard { 
+            grid-template-columns: repeat(30, 20px);
+            grid-template-rows: repeat(16, 20px);
+        }
+        .board-hard .tile { width: 20px; height: 20px; font-size: 10px; }
+        
+        @media (max-width: 768px) {
+            .difficulty-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .board-hard { 
+                grid-template-columns: repeat(30, 15px);
+                grid-template-rows: repeat(16, 15px);
+            }
+            .board-hard .tile { width: 15px; height: 15px; font-size: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⛏️ Somnia Minesweeper V2</h1>
+        <p>Blockchain-powered Minesweeper with Multiple Difficulties</p>
+    </div>
+    
+    <div class="wallet-info">
+        <div id="walletStatus">
+            <button class="btn" onclick="connectWallet()">Connect Wallet</button>
+        </div>
+    </div>
+    
+    <div class="difficulty-selection" id="difficultySelection">
+        <h3>🎯 난이도 선택</h3>
+        <div class="difficulty-options">
+            <div class="difficulty-card" data-difficulty="0" onclick="selectDifficulty(0)">
+                <div class="difficulty-title">🟢 초급</div>
+                <div class="difficulty-info">9×9<br>10개 지뢰<br>0.0005 ETH</div>
+            </div>
+            <div class="difficulty-card selected" data-difficulty="1" onclick="selectDifficulty(1)">
+                <div class="difficulty-title">🟡 중급</div>
+                <div class="difficulty-info">16×16<br>40개 지뢰<br>0.001 ETH</div>
+            </div>
+            <div class="difficulty-card" data-difficulty="2" onclick="selectDifficulty(2)">
+                <div class="difficulty-title">🔴 고급</div>
+                <div class="difficulty-info">16×30<br>99개 지뢰<br>0.002 ETH</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stats-section">
+        <h3>📊 플레이어 통계</h3>
+        <div class="stats-grid">
+            <div class="info-card">
+                <div>총 점수</div>
+                <div id="totalScore">0</div>
+            </div>
+            <div class="info-card">
+                <div>총 승리</div>
+                <div id="totalWins">0</div>
+            </div>
+            <div class="info-card">
+                <div>초급 승리</div>
+                <div id="easyWins">0</div>
+            </div>
+            <div class="info-card">
+                <div>중급 승리</div>
+                <div id="mediumWins">0</div>
+            </div>
+            <div class="info-card">
+                <div>고급 승리</div>
+                <div id="hardWins">0</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="game-info" id="gameInfo" style="display: none;">
+        <div class="info-card">
+            <div>난이도</div>
+            <div id="currentDifficulty">중급</div>
+        </div>
+        <div class="info-card">
+            <div>남은 지뢰</div>
+            <div id="minesLeft">40</div>
+        </div>
+        <div class="info-card">
+            <div>시간</div>
+            <div id="gameTime">0s</div>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="btn" id="startGameBtn" onclick="startNewGame()" disabled>
+            게임 시작 (0.001 ETH)
+        </button>
+        <button class="btn" id="refreshBtn" onclick="refreshGameState()">
+            상태 새로고침
+        </button>
+    </div>
+    
+    <div id="statusMessage" class="status-message hidden"></div>
+    
+    <div class="game-board board-medium" id="gameBoard">
+        <!-- Game board will be generated here -->
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        // Somnia Testnet configuration
+        const SOMNIA_NETWORK = {
+            chainId: '0xC488',
+            chainName: 'Somnia Testnet',
+            nativeCurrency: {
+                name: 'SLL',
+                symbol: 'SLL',
+                decimals: 18,
+            },
+            rpcUrls: ['https://dream-rpc.somnia.network/'],
+            blockExplorerUrls: ['https://shannon-explorer.somnia.network/'],
+        };
+        
+        // Contract configuration (업데이트 필요)
+        const CONTRACT_ADDRESS = '0x7CFf491db6f4B1f65623d25E409a48c352Cd8268'; // V2 컨트랙트로 업데이트 필요
+        const CONTRACT_ABI = [
+            "function startGame(uint8 difficulty) external payable",
+            "function revealTile(uint8 position) external",
+            "function flagTile(uint8 position) external",
+            "function getGameState() external view returns (uint8[] memory board, bool[] memory revealed, bool[] memory flagged, bool gameOver, bool won, uint8 difficulty, uint8 rows, uint8 cols)",
+            "function getDifficultyConfig(uint8 difficulty) external view returns (tuple(uint8 rows, uint8 cols, uint8 mines, uint256 entryFee, uint256 winningReward))",
+            "function getPlayerStats(address player) external view returns (uint256 totalScore, uint256 totalWins, uint256 easyWins, uint256 mediumWins, uint256 hardWins)",
+            "event GameStarted(address indexed player, uint8 difficulty)",
+            "event TileRevealed(address indexed player, uint8 position)",
+            "event TileFlagged(address indexed player, uint8 position, bool flagged)",
+            "event GameOver(address indexed player, bool won, uint256 score, uint8 difficulty)"
+        ];
+        
+        let provider;
+        let signer;
+        let contract;
+        let selectedDifficulty = 1; // 기본값: 중급
+        let gameState = {
+            board: [],
+            revealed: [],
+            flagged: [],
+            gameOver: false,
+            won: false,
+            difficulty: 1,
+            rows: 16,
+            cols: 16
+        };
+        let gameStartTime = 0;
+        let gameTimer;
+        let isRightClick = false;
+        
+        const difficultyConfigs = {
+            0: { name: '초급', emoji: '🟢', rows: 9, cols: 9, mines: 10, fee: '0.0005', reward: '0.001' },
+            1: { name: '중급', emoji: '🟡', rows: 16, cols: 16, mines: 40, fee: '0.001', reward: '0.003' },
+            2: { name: '고급', emoji: '🔴', rows: 16, cols: 30, mines: 99, fee: '0.002', reward: '0.008' }
+        };
+        
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum !== 'undefined') {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [SOMNIA_NETWORK],
+                    });
+                    
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send('eth_requestAccounts', []);
+                    signer = provider.getSigner();
+                    
+                    const address = await signer.getAddress();
+                    document.getElementById('walletStatus').innerHTML = `
+                        <div>연결됨: ${address.slice(0, 6)}...${address.slice(-4)}</div>
+                    `;
+                    
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+                    
+                    document.getElementById('startGameBtn').disabled = false;
+                    
+                    await updatePlayerStats();
+                    await refreshGameState();
+                    showMessage('지갑이 성공적으로 연결되었습니다!', 'success');
+                } else {
+                    showMessage('MetaMask를 설치해주세요!', 'error');
+                }
+            } catch (error) {
+                console.error('Connection error:', error);
+                showMessage('지갑 연결 실패: ' + error.message, 'error');
+            }
+        }
+        
+        function selectDifficulty(difficulty) {
+            selectedDifficulty = difficulty;
+            
+            // UI 업데이트
+            document.querySelectorAll('.difficulty-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-difficulty="${difficulty}"]`).classList.add('selected');
+            
+            // 시작 버튼 텍스트 업데이트
+            const config = difficultyConfigs[difficulty];
+            document.getElementById('startGameBtn').textContent = 
+                `게임 시작 (${config.fee} ETH)`;
+            
+            // 보드 크기 미리보기 업데이트 (게임이 없거나 종료된 경우에만)
+            if (!gameState.board.length || gameState.gameOver) {
+                updateBoardPreview(difficulty);
+            }
+        }
+        
+        function updateBoardPreview(difficulty) {
+            const board = document.getElementById('gameBoard');
+            const config = difficultyConfigs[difficulty];
+            
+            // 보드 클래스 업데이트
+            board.className = 'game-board';
+            if (difficulty === 0) board.classList.add('board-easy');
+            else if (difficulty === 1) board.classList.add('board-medium');
+            else if (difficulty === 2) board.classList.add('board-hard');
+            
+            board.innerHTML = '';
+            
+            const totalTiles = config.rows * config.cols;
+            
+            // 빈 타일로 미리보기 생성
+            for (let i = 0; i < totalTiles; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.style.cursor = 'default';
+                board.appendChild(tile);
+            }
+            
+            // 현재 난이도 표시 업데이트
+            document.getElementById('currentDifficulty').textContent = config.name;
+            document.getElementById('minesLeft').textContent = config.mines;
+        }
+        
+        async function startNewGame() {
+            try {
+                showMessage('게임을 시작하는 중...', 'loading');
+                
+                await refreshGameState();
+                
+                if (!gameState.gameOver && gameState.board.some(v => v !== 10)) {
+                    showMessage('현재 게임을 먼저 완료해주세요', 'error');
+                    return;
+                }
+                
+                document.getElementById('startGameBtn').disabled = true;
+                
+                const config = difficultyConfigs[selectedDifficulty];
+                const tx = await contract.startGame(selectedDifficulty, {
+                    value: ethers.utils.parseEther(config.fee)
+                });
+                
+                await tx.wait();
+                
+                gameStartTime = Date.now();
+                startGameTimer();
+                
+                document.getElementById('gameInfo').style.display = 'flex';
+                document.getElementById('currentDifficulty').textContent = config.name;
+                
+                await refreshGameState();
+                showMessage('새 게임이 시작되었습니다! 타일을 클릭하여 공개하세요.', 'success');
+            } catch (error) {
+                console.error('Start game error:', error);
+                
+                document.getElementById('startGameBtn').disabled = false;
+                
+                if (error.message && error.message.includes('Game already in progress')) {
+                    showMessage('게임 상태를 새로고침하는 중...', 'loading');
+                    await refreshGameState();
+                    if (gameState.gameOver) {
+                        showMessage('이전 게임이 종료되었습니다. 다시 게임을 시작해보세요.', 'info');
+                    } else {
+                        showMessage('진행 중인 게임이 있습니다. 먼저 완료해주세요.', 'error');
+                    }
+                } else {
+                    showMessage('게임 시작 실패: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        async function refreshGameState() {
+            try {
+                if (!contract) return;
+                
+                const state = await contract.getGameState();
+                gameState.board = state[0].map(n => n.toNumber ? n.toNumber() : n);
+                gameState.revealed = state[1];
+                gameState.flagged = state[2];
+                gameState.gameOver = state[3];
+                gameState.won = state[4];
+                gameState.difficulty = state[5];
+                gameState.rows = state[6];
+                gameState.cols = state[7];
+                
+                updateGameBoard();
+                updateMinesLeft();
+                
+                if (gameState.gameOver) {
+                    stopGameTimer();
+                    if (gameState.won) {
+                        showMessage('🎉 축하합니다! 승리하셨습니다!', 'success');
+                    } else {
+                        showMessage('💥 게임 오버! 지뢰를 밟았습니다.', 'error');
+                    }
+                    await updatePlayerStats();
+                    
+                    document.getElementById('startGameBtn').disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Refresh error:', error);
+                showMessage('게임 상태 새로고침 실패', 'error');
+            }
+        }
+        
+        async function revealTile(position) {
+            try {
+                if (gameState.gameOver || gameState.revealed[position] || gameState.flagged[position]) {
+                    return;
+                }
+                
+                showMessage('타일을 공개하는 중...', 'loading');
+                
+                const tx = await contract.revealTile(position);
+                await tx.wait();
+                
+                await refreshGameState();
+            } catch (error) {
+                console.error('Reveal tile error:', error);
+                showMessage('타일 공개 실패: ' + error.message, 'error');
+            }
+        }
+        
+        async function flagTile(position) {
+            try {
+                if (gameState.gameOver || gameState.revealed[position]) {
+                    return;
+                }
+                
+                const tx = await contract.flagTile(position);
+                await tx.wait();
+                
+                await refreshGameState();
+            } catch (error) {
+                console.error('Flag tile error:', error);
+                showMessage('깃발 표시 실패: ' + error.message, 'error');
+            }
+        }
+        
+        async function updatePlayerStats() {
+            try {
+                if (!contract || !signer) return;
+                
+                const address = await signer.getAddress();
+                const stats = await contract.getPlayerStats(address);
+                
+                document.getElementById('totalScore').textContent = stats[0].toString();
+                document.getElementById('totalWins').textContent = stats[1].toString();
+                document.getElementById('easyWins').textContent = stats[2].toString();
+                document.getElementById('mediumWins').textContent = stats[3].toString();
+                document.getElementById('hardWins').textContent = stats[4].toString();
+            } catch (error) {
+                console.error('Stats update error:', error);
+            }
+        }
+        
+        function updateGameBoard() {
+            const board = document.getElementById('gameBoard');
+            const config = difficultyConfigs[gameState.difficulty];
+            
+            // 보드 클래스 업데이트
+            board.className = 'game-board';
+            if (gameState.difficulty === 0) board.classList.add('board-easy');
+            else if (gameState.difficulty === 1) board.classList.add('board-medium');
+            else if (gameState.difficulty === 2) board.classList.add('board-hard');
+            
+            board.innerHTML = '';
+            
+            const totalTiles = gameState.rows * gameState.cols;
+            
+            for (let i = 0; i < totalTiles; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.position = i;
+                
+                if (gameState.flagged[i]) {
+                    tile.className += ' flagged';
+                    tile.textContent = '🚩';
+                } else if (gameState.revealed[i]) {
+                    tile.className += ' revealed';
+                    const value = gameState.board[i];
+                    
+                    if (value === 9) {
+                        tile.className += ' mine';
+                        tile.textContent = '💣';
+                    } else if (value > 0) {
+                        tile.className += ` number-${value}`;
+                        tile.textContent = value.toString();
+                    }
+                }
+                
+                tile.addEventListener('click', () => {
+                    if (!isRightClick) {
+                        revealTile(i);
+                    }
+                });
+                
+                tile.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    flagTile(i);
+                });
+                
+                tile.addEventListener('mousedown', (e) => {
+                    isRightClick = e.button === 2;
+                });
+                
+                board.appendChild(tile);
+            }
+        }
+        
+        function updateMinesLeft() {
+            const config = difficultyConfigs[gameState.difficulty];
+            const flaggedCount = gameState.flagged.filter(f => f).length;
+            document.getElementById('minesLeft').textContent = Math.max(0, config.mines - flaggedCount);
+        }
+        
+        function startGameTimer() {
+            gameTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+                document.getElementById('gameTime').textContent = `${elapsed}s`;
+            }, 1000);
+        }
+        
+        function stopGameTimer() {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+        }
+        
+        function showMessage(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.classList.remove('hidden');
+            
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusDiv.classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // 초기화
+        updateBoardPreview(selectedDifficulty);
+        
+        // 계정 변경 감지
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    document.getElementById('walletStatus').innerHTML = '<button class="btn" onclick="connectWallet()">Connect Wallet</button>';
+                    document.getElementById('startGameBtn').disabled = true;
+                } else {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
